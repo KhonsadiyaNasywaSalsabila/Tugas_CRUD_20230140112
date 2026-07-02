@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTP App ✨</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Neo-Brutalism */
+            --bg: #F4F0EA;
+            --black: #111111;
+            --white: #FFFFFF;
+            --primary: #CCFF00; /* Lime pop */
+            --secondary: #FF90E8; /* Hot pink */
+            --tertiary: #90E0FF; /* Sky blue */
+            --danger: #FF5E5E;
+            --shadow: 6px 6px 0px var(--black);
+            --shadow-sm: 3px 3px 0px var(--black);
+            --radius-lg: 24px;
+            --radius-md: 12px;
+            --border: 3px solid var(--black);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--black) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--black);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Nav Marquee (Gen Z aesthetic) */
+        .marquee-container {
+            background: var(--black);
+            color: var(--primary);
+            padding: 10px 0;
+            border-radius: 100px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            white-space: nowrap;
+            border: var(--border);
+            box-shadow: var(--shadow);
+            transform: rotate(-1deg);
+        }
+
+        .marquee {
+            display: inline-block;
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: scroll 20s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero / Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(40px, 8vw, 70px);
+            line-height: 1;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .header h1 span {
+            background: var(--primary);
+            padding: 0 10px;
+            border-radius: var(--radius-md);
+            border: var(--border);
+            display: inline-block;
+            transform: rotate(2deg);
+        }
+
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            border: var(--border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            margin-top: 10px;
+        }
+
+        .stats-num { color: var(--secondary); font-size: 20px; font-family: 'Syne', sans-serif; }
+
+        /* Notification Toast */
+        #notification {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: none;
+            padding: 12px 24px;
+            border-radius: 100px;
+            border: var(--border);
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.26, 1.55);
+        }
+
+        #notification.success { background: var(--primary); color: var(--black); }
+        #notification.error { background: var(--danger); color: var(--white); }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -50px); opacity: 0; }
+            100% { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        /* Layout Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Bento Cards */
+        .card {
+            background: var(--white);
+            border: var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 3px dashed var(--black);
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form Elements */
+        .edit-mode {
+            display: none;
+            background: var(--secondary);
+            border: var(--border);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: wiggle 1s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        .edit-mode.show { display: block; }
+
+        .field { margin-bottom: 16px; }
+
+        .field-label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .field-input, .field-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--black);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .field-input:focus, .field-select:focus {
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-2px);
+        }
+
+        /* Buttons */
+        .btn-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 24px; }
+
+        .btn {
+            padding: 14px 20px;
+            border: var(--border);
+            border-radius: var(--radius-md);
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.1s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px var(--black);
+        }
+
+        /* Table Design */
+        .table-wrap { overflow-x: auto; border-radius: var(--radius-md); }
+
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+
+        th {
+            background: var(--tertiary);
+            padding: 14px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            border-bottom: var(--border);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px 14px;
+            border-bottom: 2px solid #E0E0E0;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+
+        tbody tr:hover { background: #f9f9f9; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .td-nik {
+            font-weight: 700;
+            background: var(--black);
+            color: var(--white);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .td-name { font-weight: 700; font-size: 16px; }
+
+        /* Tags */
+        .gender-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border: 2px solid var(--black);
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .gender-m { background: var(--tertiary); }
+        .gender-f { background: var(--secondary); }
+
+        /* Action Buttons */
+        .acts { display: flex; gap: 8px; }
+
+        .act-btn {
+            padding: 6px 12px;
+            border: 2px solid var(--black);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .act-edit { background: var(--primary); box-shadow: 2px 2px 0px var(--black); }
+        .act-del { background: var(--danger); color: white; box-shadow: 2px 2px 0px var(--black); }
+
+        .act-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px var(--black); }
+
+        /* Empty State */
+        .empty { text-align: center; padding: 40px 20px; }
+        .empty span { font-size: 40px; display: block; margin-bottom: 10px; }
+        .empty p { font-family: 'Syne', sans-serif; font-weight: 700; color: #666; }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="notification"></div>
+
+<div class="marquee-container">
+    <div class="marquee">
+        🚀 WELCOME TO THE NEW ERA OF DATA MANAGEMENT ✦ SECURE ✦ FAST ✦ MODERN ✦ GEN Z APPROVED 💅 ✦ NO MORE BORING SPREADSHEETS ✦
+    </div>
+</div>
+
+<div class="wrapper">
+    <div class="header">
+        <h1>Data <span>KTP</span> Portal</h1>
+        <div class="stats-badge">
+            📂 Total Records: <span class="stats-num" id="total-count">0</span>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card form-panel">
+            <div class="card-header">
+                <div class="card-title">📝 <span id="panel-title">Input Data</span></div>
+            </div>
+
+            <div class="edit-mode" id="edit-mode">🛠️ EDIT MODE ACTIVE!</div>
+            <input type="hidden" id="editId">
+
+            <div class="field">
+                <label class="field-label">Nomor KTP (NIK)</label>
+                <input type="text" id="nomorKtp" class="field-input" placeholder="Masukkan 16 digit NIK" maxlength="16" autocomplete="off">
+            </div>
+            <div class="field">
+                <label class="field-label">Nama Lengkap</label>
+                <input type="text" id="namaLengkap" class="field-input" placeholder="Siapa namamu?" autocomplete="off">
+            </div>
+            <div class="field">
+                <label class="field-label">Alamat Lengkap</label>
+                <input type="text" id="alamat" class="field-input" placeholder="Tinggal di mana nih?" autocomplete="off">
+            </div>
+            <div class="field">
+                <label class="field-label">Tanggal Lahir</label>
+                <input type="date" id="tanggalLahir" class="field-input">
+            </div>
+            <div class="field">
+                <label class="field-label">Jenis Kelamin</label>
+                <select id="jenisKelamin" class="field-select">
+                    <option value="">Pilih dulu ges 👇</option>
+                    <option value="Laki-laki">Laki-laki 👦</option>
+                    <option value="Perempuan">Perempuan 👧</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="saveKtp()">Simpan Data ✨</button>
+                <button class="btn btn-secondary" onclick="resetForm()" title="Reset Form">↻</button>
+            </div>
+        </div>
+
+        <div class="card table-panel">
+            <div class="card-header">
+                <div class="card-title">🗂️ Database Records</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>NIK</th>
+                        <th>Nama Lengkap</th>
+                        <th>Alamat</th>
+                        <th>Tgl Lahir</th>
+                        <th>Gender</th>
+                        <th>Aksi</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SESUAIKAN DENGAN ENDPOINT SPRING BOOT KAMU
+    const API = "http://localhost:8081/ktp";
+
+    function showNotif(msg, type) {
+        const emoji = type === 'success' ? '✅ ' : '❌ ';
+        $("#notification").removeClass("success error").addClass(type)
+            .text(emoji + msg).css('display', 'block');
+        setTimeout(() => {
+            $("#notification").css('animation', 'bounceIn 0.5s reverse forwards');
+            setTimeout(() => $("#notification").css({'display': 'none', 'animation': ''}), 500);
+        }, 3000);
+    }
+
+    function loadData() {
+        $.ajax({
+            url: API,
+            method: "GET",
+            success: function(res) {
+                // Asumsi backend mengembalikan struktur { data: [...] }
+                // Jika backend mu me-return List langsung, ubah jadi: const data = res;
+                const data = res.data || res;
+                const n = data.length;
+
+                $("#total-count").text(n);
+
+                if (!n) {
+                    $("#tableBody").html(`<tr><td colspan="7"><div class="empty"><span>👻</span><p>Belum ada data bestie, isi dulu yuk!</p></div></td></tr>`);
+                    return;
+                }
+
+                let rows = "";
+                data.forEach((k, i) => {
+                    const isM = k.jenisKelamin.includes('Laki-laki');
+                    rows += `<tr>
+                        <td><b>${i+1}</b></td>
+                        <td><span class="td-nik">${k.nomorKtp}</span></td>
+                        <td class="td-name">${k.namaLengkap}</td>
+                        <td>${k.alamat}</td>
+                        <td>${k.tanggalLahir}</td>
+                        <td><span class="gender-tag ${isM ? 'gender-m' : 'gender-f'}">${isM ? '👦 Cowok' : '👧 Cewek'}</span></td>
+                        <td>
+                            <div class="acts">
+                                <button class="act-btn act-edit" onclick='editKtp(${JSON.stringify(k)})'>✏️ Edit</button>
+                                <button class="act-btn act-del" onclick="deleteKtp(${k.id})">🗑️ Hapus</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+                $("#tableBody").html(rows);
+            },
+            error: () => showNotif("Duh, gagal connect ke server nih! 😭", "error")
+        });
+    }
+
+    function saveKtp() {
+        const id = $("#editId").val();
+        const data = {
+            nomorKtp: $("#nomorKtp").val(),
+            namaLengkap: $("#namaLengkap").val(),
+            alamat: $("#alamat").val(),
+            tanggalLahir: $("#tanggalLahir").val(),
+            jenisKelamin: $("#jenisKelamin").val()
+        };
+
+        if (!data.nomorKtp || !data.namaLengkap || !data.alamat || !data.tanggalLahir || !data.jenisKelamin) {
+            showNotif("Eits, isi semua kolomnya dulu ya! 👀", "error");
+            return;
+        }
+
+        $.ajax({
+            url: id ? `${API}/${id}` : API,
+            method: id ? "PUT" : "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: res => {
+                showNotif(res.message || "Data berhasil disimpen! 🎉", "success");
+                resetForm();
+                loadData();
+            },
+            error: xhr => showNotif(xhr.responseJSON?.message || "Yahh, operasinya gagal! 🥲", "error")
+        });
+    }
+
+    function editKtp(k) {
+        $("#editId").val(k.id);
+        $("#nomorKtp").val(k.nomorKtp);
+        $("#namaLengkap").val(k.namaLengkap);
+        $("#alamat").val(k.alamat);
+        $("#tanggalLahir").val(k.tanggalLahir);
+
+        // Handling select value mapping safely
+        if (k.jenisKelamin.includes('Laki')) $("#jenisKelamin").val("Laki-laki");
+        else $("#jenisKelamin").val("Perempuan");
+
+        $("#panel-title").text("Edit Data");
+        $("#edit-mode").addClass("show");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteKtp(id) {
+        if (!confirm("Beneran mau hapus data ini ges? 🥺")) return;
+        $.ajax({
+            url: `${API}/${id}`,
+            method: "DELETE",
+            success: res => {
+                showNotif(res.message || "Data udah lenyap! 💨", "success");
+                loadData();
+            },
+            error: xhr => showNotif(xhr.responseJSON?.message || "Gagal ngehapus data nih!", "error")
+        });
+    }
+
+    function resetForm() {
+        $("#editId, #nomorKtp, #namaLengkap, #alamat, #tanggalLahir, #jenisKelamin").val("");
+        $("#panel-title").text("Input Data");
+        $("#edit-mode").removeClass("show");
+    }
+
+    // Panggil saat load pertama kali
+    $(document).ready(() => {
+        loadData();
+    });
+</script>
+</body>
+</html>
