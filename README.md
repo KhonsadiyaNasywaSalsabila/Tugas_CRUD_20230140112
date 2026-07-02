@@ -1,6 +1,6 @@
 # 🪪 Aplikasi Manajemen Data KTP (CRUD)
 
-Aplikasi berbasis web untuk mengelola data Kartu Tanda Penduduk (KTP) menggunakan arsitektur Client-Server. Proyek ini dibangun untuk memenuhi tugas praktikum pembuatan API dan integrasi *frontend*.
+Aplikasi berbasis web untuk mengelola data Kartu Tanda Penduduk (KTP) menggunakan arsitektur Client-Server. 
 
 **Identitas:**
 * **Nama:** Khonsadiya Nasywa Salsabila
