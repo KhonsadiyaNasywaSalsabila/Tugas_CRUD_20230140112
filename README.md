@@ -52,7 +52,7 @@ Terdapat fitur safety berupa pop-up konfirmasi sebelum menghapus data, sehingga 
 ---
 
 
-## ⚙️ Dokumentasi Server & Database (Tugas 1)
+## ⚙️ Dokumentasi Server & Database
 
 ### 1. Struktur Database
 Database menggunakan MySQL dengan nama skema `spring`. Tabel `ktp` telah disesuaikan tipe datanya.
